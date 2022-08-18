@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "std/": "https://deno.land/std@0.152.0/",
+    "/": "./src/",
+    "./": "./",
+    "tests": "./tests",
+    "postgres": "https://deno.land/x/postgres@v0.16.1/mod.ts",
+    "denomailer": "https://deno.land/x/denomailer@1.2.0/mod.ts",
+    "eta": "https://deno.land/x/eta@v1.12.3/mod.ts"
+  }
+}
