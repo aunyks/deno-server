@@ -1,33 +1,17 @@
 import * as postgres from 'postgres';
-import * as Eta from 'eta';
 import { SMTPClient } from 'denomailer';
-import { serveDir } from '/file_server.ts';
 import { Router } from '/router.ts';
-
-const router = new Router();
-
-router.get('/hi/:name', async (_req, params) => {
-	const viewDetails = { name: params.name };
-	return new Response(
-		await Eta.renderFile('/hi', viewDetails) as BodyInit,
-	);
-});
-
-router.get('/*', (req, _params, { workingDir }) => {
-	return serveDir(req, {
-		fsRoot: `${workingDir}/static`,
-		showDirListing: true,
-		showDotfiles: false,
-		enableCors: true,
-		quiet: true,
-	});
-});
+import registerBasicHandlers from '/routes/basic.ts';
 
 type GlobalState = {
 	sqlConnPool: postgres.Pool;
 	mailClient: SMTPClient;
 	workingDir: string;
 };
+
+const router = new Router();
+
+registerBasicHandlers(router);
 
 class Server {
 	globalState: GlobalState;
