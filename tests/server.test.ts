@@ -3,6 +3,7 @@ import { SMTPClient } from 'denomailer';
 import * as Eta from 'eta';
 
 import { Server } from '/server.ts';
+import { Logger } from '/logger.ts';
 import { assertEquals } from 'std/testing/asserts.ts';
 import { afterAll, beforeAll, it } from 'std/testing/bdd.ts';
 
@@ -64,6 +65,7 @@ beforeAll(async () => {
 		sqlConnPool: pool,
 		mailClient: mailClient,
 		workingDir: cwd,
+		log: new Logger()
 	});
 });
 

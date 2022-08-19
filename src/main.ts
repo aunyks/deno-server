@@ -4,6 +4,8 @@ import * as postgres from 'postgres';
 import * as Eta from 'eta';
 import { SMTPClient } from 'denomailer';
 import { Server } from '/server.ts';
+import { ConsoleLogger } from '/logger.ts';
+import { Message } from 'https://deno.land/x/postgres@v0.16.1/connection/message.ts';
 
 const serverArgs = parse(Deno.args, {
 	string: ['port', 'host', 'workingDir'],
@@ -97,6 +99,9 @@ async function main() {
 		sqlConnPool: pool,
 		mailClient: mailClient,
 		workingDir: CWD,
+		log: new ConsoleLogger().withFilter((_level, message) => {
+			return !message.includes('Gerald')
+		})
 	});
 
 	addEventListener('unload', async () => {
