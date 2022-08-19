@@ -100,8 +100,8 @@ async function main() {
 		mailClient: mailClient,
 		workingDir: CWD,
 		log: new ConsoleLogger().withFilter((_level, message) => {
-			return !message.includes('Gerald')
-		})
+			return !message.includes('Gerald');
+		}),
 	});
 
 	addEventListener('unload', async () => {

@@ -1,14 +1,14 @@
 import * as postgres from 'postgres';
 import { SMTPClient } from 'denomailer';
 import { Router } from '/router.ts';
-import { Logger } from '/logger.ts'; 
+import { Logger } from '/logger.ts';
 import registerBasicHandlers from '/routes/basic.ts';
 
 type GlobalState = {
-	sqlConnPool: postgres.Pool;
-	mailClient: SMTPClient;
-	workingDir: string;
-	log: Logger;
+	readonly sqlConnPool: postgres.Pool;
+	readonly mailClient: SMTPClient;
+	readonly workingDir: string;
+	readonly log: Logger;
 };
 
 const router = new Router();

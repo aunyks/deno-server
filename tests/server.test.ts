@@ -1,72 +1,12 @@
-import * as postgres from 'postgres';
-import { SMTPClient } from 'denomailer';
-import * as Eta from 'eta';
-
-import { Server } from '/server.ts';
-import { Logger } from '/logger.ts';
+import { Server } from 'src/server.ts';
 import { assertEquals } from 'std/testing/asserts.ts';
 import { afterAll, beforeAll, it } from 'std/testing/bdd.ts';
+import { initTestServer } from 'tests/helpers/mod.ts';
 
 let server: Server | null = null;
 
 beforeAll(async () => {
-	const {
-		DATABASE_URL,
-		SMTP_HOST,
-		SMTP_PORT,
-		SMTP_USERNAME,
-		SMTP_PASSWORD,
-	} = Deno.env.toObject();
-	const pool = new postgres.Pool(
-		DATABASE_URL,
-		1,
-		false,
-	);
-
-	const connection = await pool.connect();
-	try {
-		// Create the table
-		await connection.queryObject`
-  	CREATE TABLE IF NOT EXISTS todos (
-  	  id SERIAL PRIMARY KEY,
-  	  title TEXT NOT NULL
-  	)
-    `;
-	} finally {
-		await connection.end();
-	}
-
-	const mailClient = new SMTPClient({
-		debug: {
-			allowUnsecure: true,
-		},
-		connection: {
-			hostname: SMTP_HOST,
-			port: Number(SMTP_PORT),
-			tls: false,
-			auth: {
-				username: SMTP_USERNAME,
-				password: SMTP_PASSWORD,
-			},
-		},
-		pool: {
-			size: 1,
-		},
-	});
-
-	const cwd = Deno.cwd();
-	const viewsPath = `${cwd}/views/`;
-	Eta.configure({
-		cache: true,
-		views: viewsPath,
-	});
-
-	server = new Server({
-		sqlConnPool: pool,
-		mailClient: mailClient,
-		workingDir: cwd,
-		log: new Logger()
-	});
+	server = await initTestServer();
 });
 
 afterAll(async () => {
