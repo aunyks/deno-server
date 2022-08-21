@@ -32,8 +32,16 @@ halt_aux_services:
 test: launch_aux_services && halt_aux_services
   -deno test --allow-net --allow-env --allow-read
 
+@debug_test: launch_aux_services && halt_aux_services
+  deno eval "console.log('\nNOTE: Once the debugger is open, resume execution without stepping to run tests until the next \'debugger\' statement appears.\n')"
+  @-deno test --inspect-brk --allow-net --allow-env --allow-read
+
 serve_files:
   deno run --allow-net --allow-read /file_server.ts
 
 start:
   deno run --allow-net --allow-env --allow-read /main.ts
+
+@debug:
+  deno eval "console.log('\nNOTE: Once the debugger is open, resume execution without stepping to run the program until the next \'debugger\' statement appears.\n')"
+  @deno run --inspect-brk --allow-net --allow-env --allow-read /main.ts
