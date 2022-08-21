@@ -8,8 +8,14 @@ export default function registerBasicHandlers(router: Router) {
 		'/hi/:name',
 		async (_req: Request, params: Record<string, string>) => {
 			const viewDetails = { name: params.name };
+			const headers = new Headers({
+				'Content-Type': 'text/html;charset=UTF-8'
+			})
 			return new Response(
 				await Eta.renderFile('/hi', viewDetails) as BodyInit,
+				{
+					headers
+				}
 			);
 		},
 	);
