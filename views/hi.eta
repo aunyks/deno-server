@@ -8,7 +8,8 @@
         <title>Greeting Page</title>
     </head>
 
-    <body>hi <%= it.name %>
+    <body>
+       <div id="msg">hi <%= it.name %></div>
         <script>
             console.log('<%= it.name %>')
         </script>

@@ -1,11 +1,11 @@
 import { serve } from 'std/http/server.ts';
 import { parse } from 'std/flags/mod.ts';
 import * as postgres from 'postgres';
+import { StatsDClient } from 'statsd';
 import * as Eta from 'eta';
 import { SMTPClient } from 'denomailer';
 import { Server } from '/server.ts';
 import { ConsoleLogger } from '/logger.ts';
-import { Message } from 'https://deno.land/x/postgres@v0.16.1/connection/message.ts';
 
 const serverArgs = parse(Deno.args, {
 	string: ['port', 'host', 'workingDir'],
@@ -49,6 +49,8 @@ async function main() {
 		SMTP_TLS_MODE,
 		SMTP_USERNAME,
 		SMTP_PASSWORD,
+		STATSD_URL,
+		STATSD_MTU,
 	} = Deno.env.toObject();
 
 	const dbConnectionUrl = DATABASE_URL;
@@ -87,6 +89,19 @@ async function main() {
 		},
 	});
 
+	const statsdUrl = new URL(STATSD_URL);
+	const statsdClient = new StatsDClient({
+		server: {
+			// @ts-ignore: We're trusting that
+			//             this will always either
+			//             be 'tcp' or 'udp' at runtime
+			proto: statsdUrl.protocol.slice(0, -1),
+			host: statsdUrl.hostname,
+			port: parseInt(statsdUrl.port),
+			mtu: parseInt(STATSD_MTU ?? 512),
+		},
+	});
+
 	const CWD = serverArgs.workingDir;
 
 	const viewsPath = `${CWD}/views/`;
@@ -102,6 +117,7 @@ async function main() {
 		log: new ConsoleLogger().withFilter((_level, message) => {
 			return !message.includes('Gerald');
 		}),
+		statsdClient: statsdClient,
 	});
 
 	addEventListener('unload', async () => {

@@ -25,3 +25,30 @@ services:
     ports:
       - 1025:1025
       - 8025:8025
+  influxdb:
+    image: influxdb:2.1.1
+    env_file:
+      - .env
+    volumes:
+      - influxdb-storage:/var/lib/influxdb2:rw
+    ports:
+      - ${DOCKER_INFLUXDB_INIT_PORT}:8086
+    entrypoint: ["./entrypoint.sh"]
+    restart: on-failure:10
+  # To test, run the following in a terminal 
+  # to send an example "mycounter" metric:
+  #
+  # echo "mycounter:10|c" | nc -C -w 1 -u localhost 8125
+  telegraf:
+    image: telegraf:1.19
+    env_file:
+      - .env
+    volumes:
+      - ${TELEGRAF_CFG_PATH}:/etc/telegraf/telegraf.conf:r
+    ports:
+      - ${TELEGRAF_STATSD_PORT}:${TELEGRAF_STATSD_PORT}/udp
+    depends_on:
+      - influxdb
+
+volumes:
+  influxdb-storage:

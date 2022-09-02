@@ -1,5 +1,6 @@
 import * as postgres from 'postgres';
 import { SMTPClient } from 'denomailer';
+import { StatsDClient } from 'statsd';
 import * as Eta from 'eta';
 import { Logger } from 'src/logger.ts';
 import { Server } from 'src/server.ts';
@@ -55,6 +56,11 @@ export async function initTestServer(
 		},
 	});
 
+	const statsdClient = new StatsDClient({
+		// @ts-ignore: TS incorrectly lints this property
+		logger: customArgs?.logger || new Logger(),
+	});
+
 	const cwd = Deno.cwd();
 	const viewsPath = `${cwd}/views/`;
 	Eta.configure({
@@ -67,5 +73,6 @@ export async function initTestServer(
 		mailClient: mailClient,
 		workingDir: cwd,
 		log: customArgs?.logger || new Logger(),
+		statsdClient: statsdClient,
 	});
 }

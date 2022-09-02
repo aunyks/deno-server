@@ -2,6 +2,7 @@ import { Server } from 'src/server.ts';
 import { assertEquals } from 'std/testing/asserts.ts';
 import { afterAll, beforeAll, it } from 'std/testing/bdd.ts';
 import { initTestServer } from 'tests/helpers/mod.ts';
+import { DOMParser } from 'deno-dom';
 
 let server: Server | null = null;
 
@@ -18,7 +19,9 @@ it('/hi returns hi', async () => {
 	const res = await server?.handleRequest(req);
 	const body = await res?.text();
 	assertEquals(res?.status, 200);
-	assertEquals(body, 'hi gerald');
+	const doc = new DOMParser().parseFromString(body as string, 'text/html');
+	const bodyText = doc?.getElementById('msg')?.innerText;
+	assertEquals(bodyText, 'hi gerald');
 });
 
 // Deno.test('sent email', async () => {

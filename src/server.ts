@@ -1,5 +1,6 @@
 import * as postgres from 'postgres';
 import { SMTPClient } from 'denomailer';
+import { StatsDClient } from 'statsd';
 import { Router } from '/router.ts';
 import { Logger } from '/logger.ts';
 import registerBasicHandlers from '/routes/basic.ts';
@@ -9,6 +10,7 @@ type GlobalState = {
 	readonly mailClient: SMTPClient;
 	readonly workingDir: string;
 	readonly log: Logger;
+	readonly statsdClient: StatsDClient;
 };
 
 const router = new Router();
@@ -29,6 +31,7 @@ class Server {
 	async destroy(): Promise<void> {
 		await this.globalState.sqlConnPool.end();
 		await this.globalState.mailClient.close();
+		await this.globalState.statsdClient.close();
 	}
 }
 

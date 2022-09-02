@@ -7,6 +7,8 @@
     "tests/": "./tests/",
     "postgres": "https://deno.land/x/postgres@v0.16.1/mod.ts",
     "denomailer": "https://deno.land/x/denomailer@1.2.0/mod.ts",
-    "eta": "https://deno.land/x/eta@v1.12.3/mod.ts"
+    "eta": "https://deno.land/x/eta@v1.12.3/mod.ts",
+    "statsd": "https://deno.land/x/statsd@0.5.0/mod.ts",
+    "deno-dom": "https://deno.land/x/deno_dom/deno-dom-wasm.ts"
   }
 }
