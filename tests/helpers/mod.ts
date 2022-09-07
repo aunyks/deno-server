@@ -59,6 +59,9 @@ export async function initTestServer(
 	const statsdClient = new StatsDClient({
 		// @ts-ignore: TS incorrectly lints this property
 		logger: customArgs?.logger || new Logger(),
+		server: {
+			proto: 'logger',
+		},
 	});
 
 	const cwd = Deno.cwd();
