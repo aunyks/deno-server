@@ -6,11 +6,12 @@ import { serveDir } from '/file_server.ts';
 export default function registerBasicHandlers(router: Router) {
 	router.get(
 		'/hi/:name',
-		async (_req: Request, params: Record<string, string>) => {
+		async (_req: Request, params: Record<string, string>, {statsdClient}) => {
 			const viewDetails = { name: params.name };
 			const headers = new Headers({
 				'Content-Type': 'text/html;charset=UTF-8',
 			});
+			statsdClient.count('greeting')
 			return new Response(
 				await Eta.renderFile('/hi', viewDetails) as BodyInit,
 				{

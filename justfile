@@ -11,7 +11,7 @@ export SMTP_PORT := "1025"
 export SMTP_TLS_MODE := "none"
 export SMTP_USERNAME := "user"
 export SMTP_PASSWORD := "smtp_pass"
-export STATSD_URL := "udp://localhost:8125/"
+export STATSD_URL := "udp://127.0.0.1:8125/"
 
 default:
   just --list
