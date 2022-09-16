@@ -2,7 +2,7 @@ import * as postgres from 'postgres';
 import { SMTPClient } from 'denomailer';
 import { StatsDClient } from 'statsd';
 import * as Eta from 'eta';
-import { Logger } from 'src/logger.ts';
+import { Logger } from 'src/lib/logger.ts';
 import { Server } from 'src/server.ts';
 
 type CustomServerArgs = {
@@ -65,7 +65,7 @@ export async function initTestServer(
 	});
 
 	const cwd = Deno.cwd();
-	const viewsPath = `${cwd}/views/`;
+	const viewsPath = `${cwd}/src/views/`;
 	Eta.configure({
 		cache: true,
 		views: viewsPath,

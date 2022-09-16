@@ -2,7 +2,7 @@ import * as postgres from 'postgres';
 import { SMTPClient } from 'denomailer';
 import { StatsDClient } from 'statsd';
 import { Router } from '/router.ts';
-import { Logger } from '/logger.ts';
+import { Logger } from '/lib/logger.ts';
 import registerBasicHandlers from '/routes/basic.ts';
 
 type GlobalState = {

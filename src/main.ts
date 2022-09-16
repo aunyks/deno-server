@@ -5,7 +5,7 @@ import { StatsDClient } from 'statsd';
 import * as Eta from 'eta';
 import { SMTPClient } from 'denomailer';
 import { Server } from '/server.ts';
-import { ConsoleLogger } from '/logger.ts';
+import { ConsoleLogger } from '/lib/logger.ts';
 
 const serverArgs = parse(Deno.args, {
 	string: ['port', 'host', 'workingDir'],
@@ -104,7 +104,7 @@ async function main() {
 
 	const CWD = serverArgs.workingDir;
 
-	const viewsPath = `${CWD}/views/`;
+	const viewsPath = `${CWD}/src/views/`;
 	Eta.configure({
 		cache: true,
 		views: viewsPath,

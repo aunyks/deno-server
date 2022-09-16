@@ -33,7 +33,7 @@ export default function registerBasicHandlers(router: Router) {
 			{ workingDir }: GlobalState,
 		) => {
 			return serveDir(req, {
-				fsRoot: `${workingDir}/static`,
+				fsRoot: `${workingDir}/src/static`,
 				showDirListing: true,
 				showDotfiles: false,
 				enableCors: true,
