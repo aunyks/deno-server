@@ -14,15 +14,15 @@ afterAll(async () => {
 	await server?.destroy();
 });
 
-it('/hi returns hi', async () => {
-	const req = new Request('proto://hostname.tld/hi/gerald');
-	const res = await server?.handleRequest(req);
-	const body = await res?.text();
-	assertEquals(res?.status, 200);
-	const doc = new DOMParser().parseFromString(body as string, 'text/html');
-	const bodyText = doc?.getElementById('msg')?.innerText;
-	assertEquals(bodyText, 'hi gerald');
-});
+// it('/hi returns hi', async () => {
+// 	const req = new Request('proto://hostname.tld/hi/gerald');
+// 	const res = await server?.handleRequest(req);
+// 	const body = await res?.text();
+// 	assertEquals(res?.status, 200);
+// 	const doc = new DOMParser().parseFromString(body as string, 'text/html');
+// 	const bodyText = doc?.getElementById('msg')?.innerText;
+// 	assertEquals(bodyText, 'hi gerald');
+// });
 
 // Deno.test('sent email', async () => {
 // 	// https://github.com/mailhog/MailHog/tree/master/docs/APIv2

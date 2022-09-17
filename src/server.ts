@@ -3,7 +3,8 @@ import { SMTPClient } from 'denomailer';
 import { StatsDClient } from 'statsd';
 import { Router } from '/router.ts';
 import { Logger } from '/lib/logger.ts';
-import registerBasicHandlers from '/routes/basic.ts';
+import registerStaticHandlers from '/routes/static-files.ts';
+import registerMarketingHandlers from '/routes/marketing.ts';
 
 interface PasswordHasher {
 	hash(password: string, saltB64?: string): string;
@@ -25,7 +26,11 @@ type GlobalState = {
 
 const router = new Router();
 
-registerBasicHandlers(router);
+// Register handlers in order of priority. 
+// This means wildcard / catch-all handlers 
+// like the static file handlers must register last
+registerMarketingHandlers(router);
+registerStaticHandlers(router);
 
 class Server {
 	globalState: GlobalState;

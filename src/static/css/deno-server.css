@@ -220,6 +220,11 @@ header.navbar {
   top: 0;
 }
 
+header.navbar > aside > a {
+  --color: var(--color);
+  text-decoration: none;
+}
+
 header.navbar > aside {
   background: var(--primary);
   color: var(--switch-color);

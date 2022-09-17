@@ -9,9 +9,9 @@ function serveStatic(
 ): Promise<Response> {
 	return serveDir(req, {
 		fsRoot: `${opts.workingDir}/src/static`,
-		showDirListing: true,
+		showDirListing: false,
 		showDotfiles: false,
-		enableCors: true,
+		enableCors: false,
 		quiet: true,
 	});
 }
