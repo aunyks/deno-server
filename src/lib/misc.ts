@@ -16,9 +16,5 @@ function serveStatic(
 	});
 }
 
-function htmlContentType(): string {
-	return 'text/html;charset=UTF-8';
-}
-
-export { htmlContentType, serveStatic };
+export { serveStatic };
 export type { StaticFileServeOptions };
