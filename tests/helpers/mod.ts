@@ -4,6 +4,7 @@ import { StatsDClient } from 'statsd';
 import * as Eta from 'eta';
 import { Logger } from 'src/lib/logger.ts';
 import { Server } from 'src/server.ts';
+import { Argon2 } from '/lib/argon2.ts';
 
 type CustomServerArgs = {
 	logger?: Logger;
@@ -71,11 +72,17 @@ export async function initTestServer(
 		views: viewsPath,
 	});
 
+	const argon2Hasher = await Argon2.initialize({
+		saltLength: 16,
+		outputLength: 32,
+	});
+
 	return new Server({
 		sqlConnPool: pool,
 		mailClient: mailClient,
 		workingDir: cwd,
 		log: customArgs?.logger || new Logger(),
 		statsdClient: statsdClient,
+		passwordHasher: argon2Hasher,
 	});
 }

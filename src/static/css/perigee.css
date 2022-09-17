@@ -1,0 +1,332 @@
+/*
+  Use this file to override pico defaults.
+*/
+
+:root {
+  --modal-overlay-background-color: rgba(0, 0, 0, 0.65);
+}
+
+:root:not([data-theme='dark']) {
+  --primary: #5d44f8;
+}
+
+html {
+  cursor: auto;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+@media only screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --primary: #fab700;
+  }
+}
+
+/*
+The opposite of aria-hidden="true", this makes an element 
+aria-accessible but visually hidden. Ex:
+<element visually-hidden="true">
+*/
+[visually-hidden='true'] {
+  display: block;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(1px);
+  white-space: nowrap;
+  position: absolute;
+}
+
+@-webkit-keyframes fadeIn {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: var(--modal-overlay-background-color);
+  }
+}
+
+/* Modal */
+@keyframes fadeIn {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: var(--modal-overlay-background-color);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    -webkit-transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    -webkit-transform: translateY(00px);
+    opacity: 1;
+  }
+}
+
+:root {
+  --scrollbar-width: 0px;
+}
+
+dialog {
+  display: flex;
+  z-index: 999;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  align-items: center;
+  justify-content: center;
+  width: inherit;
+  min-width: 100%;
+  height: inherit;
+  min-height: 100%;
+  padding: var(--spacing);
+  border: none;
+  background-color: var(--modal-overlay-background-color);
+  -webkit-backdrop-filter: blur(3px) !important;
+  backdrop-filter: blur(3px) !important;
+}
+
+dialog article {
+  min-width: 20rem;
+  max-height: 60vh;
+  overflow-y: scroll;
+}
+
+@media (min-width: 576px) {
+  dialog article {
+    max-width: 510px;
+  }
+}
+
+@media (min-width: 768px) {
+  dialog article {
+    max-width: 700px;
+  }
+}
+dialog article > header,
+dialog article > footer {
+  padding: calc(var(--block-spacing-vertical) * 0.5)
+    var(--block-spacing-horizontal);
+}
+dialog article > header .close {
+  margin: 0;
+  margin-left: var(--spacing);
+  float: right;
+}
+dialog article > footer {
+  text-align: right;
+}
+dialog article > footer [role='button'] {
+  margin-bottom: 0;
+}
+dialog article > footer [role='button']:not(:first-of-type) {
+  margin-left: calc(var(--spacing) * 0.5);
+}
+dialog article p:last-of-type {
+  margin: 0;
+}
+dialog article .close {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  margin-top: calc(var(--block-spacing-vertical) * -0.5);
+  margin-bottom: var(--typography-spacing-vertical);
+  margin-left: auto;
+  background-image: var(--icon-close);
+  background-position: center;
+  background-size: auto 1rem;
+  background-repeat: no-repeat;
+  opacity: 0.5;
+  transition: opacity var(--transition);
+}
+dialog article .close:hover,
+dialog article .close:active,
+dialog article .close:focus {
+  opacity: 1;
+}
+dialog:not([open]),
+dialog[open='false'] {
+  display: none;
+}
+
+dialog article > h1, h2, h3 {
+  margin-bottom: 0.5rem;
+}
+
+.modal-is-open {
+  padding-right: var(--scrollbar-width, 0px);
+  overflow: hidden;
+  pointer-events: none;
+}
+.modal-is-open dialog {
+  pointer-events: auto;
+}
+
+.modal-is-opening dialog,
+.modal-is-opening dialog > article,
+.modal-is-closing dialog,
+.modal-is-closing dialog > article {
+  -webkit-animation-duration: 0.2s;
+  animation-duration: 0.2s;
+  -webkit-animation-timing-function: ease-in-out;
+  animation-timing-function: ease-in-out;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+.modal-is-opening dialog,
+.modal-is-closing dialog {
+  -webkit-animation-duration: 0.2s;
+  animation-duration: 0.2s;
+  -webkit-animation-name: fadeIn;
+  animation-name: fadeIn;
+}
+
+dialog > article {
+  animation-name: slideUp;
+}
+
+.modal-is-closing dialog,
+.modal-is-closing dialog > article {
+  animation-direction: reverse;
+}
+
+a[role='button'],
+button,
+input[type='button'],
+input[type='reset'],
+input[type='submit'] {
+  border: none;
+}
+
+header.navbar {
+  padding: initial;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+}
+
+header.navbar > aside {
+  background: var(--primary);
+  color: var(--switch-color);
+  text-align: center;
+  padding: calc(var(--spacing) * .25) 0 calc(var(--spacing) * 0.25) 0;
+}
+
+nav.navbar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+  padding: 0 10px 0 10px;
+  flex-wrap: wrap;
+  background: var(--background-color);
+  position: sticky;
+  top: 0;
+}
+
+nav.navbar > ul:first-of-type, nav.navbar > ul:last-of-type {
+  margin: initial;
+}
+nav.navbar > .navbar-header {
+  padding: var(--spacing) calc(var(--spacing) * .5) var(--spacing) 0;
+}
+
+nav.navbar > .navbar-header * {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+nav.navbar * {
+  --color: #415462;
+}
+
+nav.navbar > label[for="navbar-checkbox"] rect {
+  fill: var(--color);
+}
+
+nav.navbar a {
+  padding: initial;
+  margin: initial;
+}
+
+nav.navbar > ul:last-child > li:last-child {
+  padding: var(--spacing) 0 var(--spacing) calc(var(--spacing) * .5);
+}
+nav.navbar > ul > li > ul {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  transition: all 0.5s ease;
+  display: none;
+}
+nav.navbar > ul > li:hover > ul,
+nav.navbar > ul > li:focus-within > ul,
+nav.navbar > ul > li > ul:hover {
+  visibility: visible;
+  opacity: 1;
+  display: block;
+}
+nav.navbar > ul > li > ul > li {
+  clear: both;
+  width: 100%;
+  text-align: left;
+  background:white;
+  /* margin-left: calc(var(--spacing) * -.5); */
+  /* margin-right: calc(var(--spacing) * -.5); */
+}
+
+nav.navbar > #navbar-checkbox {
+  display: none;
+}
+
+nav.navbar > label[for="navbar-checkbox"] {
+  display: none;
+}
+
+nav.navbar > #navbar-checkbox:checked ~ ul {
+  display: block
+}
+
+@media screen and (max-width: 768px){
+  nav.navbar > #navbar-checkbox:not(:checked) ~ ul {
+    display: none;
+  }
+  nav.navbar > #navbar-checkbox:checked ~ ul {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  nav.navbar > #navbar-checkbox:checked ~ .navbar-header,
+  nav.navbar > #navbar-checkbox:checked ~ label[for="navbar-checkbox"] {
+    flex-wrap: 0;
+  }
+
+  nav.navbar > label[for="navbar-checkbox"] {
+    margin: initial;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  nav.navbar > ul > li {
+    padding: var(--spacing) calc(var(--spacing) * .5) var(--spacing) 0;
+    width: 100%;
+  }
+
+  nav.navbar > ul:last-child > li:last-child {
+    padding: var(--spacing) calc(var(--spacing) * .5) var(--spacing) 0;
+  }
+}

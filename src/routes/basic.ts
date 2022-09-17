@@ -1,7 +1,8 @@
 import * as Eta from 'eta';
 import { Router } from '/router.ts';
 import { GlobalState } from '/server.ts';
-import { serveDir } from '/file_server.ts';
+import { serveStatic } from '/lib/misc.ts';
+import { htmlContentType } from '/lib/headers.ts';
 
 export default function registerBasicHandlers(router: Router) {
 	router.get(
@@ -13,7 +14,7 @@ export default function registerBasicHandlers(router: Router) {
 		) => {
 			const viewDetails = { name: params.name };
 			const headers = new Headers({
-				'Content-Type': 'text/html;charset=UTF-8',
+				'Content-Type': htmlContentType(),
 			});
 			statsdClient.count('greeting');
 			return new Response(
@@ -32,12 +33,8 @@ export default function registerBasicHandlers(router: Router) {
 			_params: Record<string, string>,
 			{ workingDir }: GlobalState,
 		) => {
-			return serveDir(req, {
-				fsRoot: `${workingDir}/src/static`,
-				showDirListing: true,
-				showDotfiles: false,
-				enableCors: true,
-				quiet: true,
+			return serveStatic(req, {
+				workingDir,
 			});
 		},
 	);

@@ -6,6 +6,7 @@ import * as Eta from 'eta';
 import { SMTPClient } from 'denomailer';
 import { Server } from '/server.ts';
 import { ConsoleLogger } from '/lib/logger.ts';
+import { Argon2 } from '/lib/argon2.ts';
 
 const serverArgs = parse(Deno.args, {
 	string: ['port', 'host', 'workingDir'],
@@ -110,6 +111,11 @@ async function main() {
 		views: viewsPath,
 	});
 
+	const argon2Hasher = await Argon2.initialize({
+		saltLength: 16,
+		outputLength: 32,
+	});
+
 	const server = new Server({
 		sqlConnPool: pool,
 		mailClient: mailClient,
@@ -118,6 +124,7 @@ async function main() {
 			return !message.includes('Gerald');
 		}),
 		statsdClient: statsdClient,
+		passwordHasher: argon2Hasher,
 	});
 
 	addEventListener('unload', async () => {
