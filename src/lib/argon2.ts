@@ -104,7 +104,7 @@ class Argon2 {
 		this._options = options;
 	}
 
-	hash(password: string, saltB64?: string): string {
+	hash(password: string, saltB64?: string): [string, string] {
 		const passwordBytes = toBytes(password);
 		if (passwordBytes.length > 0xFFFFFFFF) {
 			throw new Error(
@@ -144,6 +144,8 @@ class Argon2 {
 			saltWriter.set(saltBytes);
 		} else {
 			crypto.getRandomValues(saltWriter);
+			// Copy the salt bytes for returning before they get freed
+			saltB64 = toBase64(saltWriter.slice(0));
 		}
 
 		// @ts-ignore
@@ -171,15 +173,15 @@ class Argon2 {
 		// @ts-ignore
 		this._wasmExports.free_bytes(digestPtr, this._options.outputLength);
 
-		return toBase64(outputBytes);
+		return [toBase64(outputBytes), saltB64];
 	}
 
 	verify(
 		password: string,
+		saltB64: string,
 		existingB64Digest: string,
-		saltB64?: string,
 	): boolean {
-		return this.hash(password, saltB64) === existingB64Digest;
+		return this.hash(password, saltB64)[0] === existingB64Digest;
 	}
 }
 

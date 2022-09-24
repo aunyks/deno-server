@@ -290,7 +290,6 @@ export async function serveFile(
 	});
 }
 
-// TODO(bartlomieju): simplify this after deno.stat and deno.readDir are fixed
 async function serveDirIndex(
 	req: Request,
 	dirPath: string,

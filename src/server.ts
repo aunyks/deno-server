@@ -5,9 +5,10 @@ import { Router } from '/router.ts';
 import { Logger } from '/lib/logger.ts';
 import registerStaticHandlers from '/routes/static-files.ts';
 import registerMarketingHandlers from '/routes/marketing.ts';
+import registerAuthHandlers from '/routes/auth.ts';
 
 interface PasswordHasher {
-	hash(password: string, saltB64?: string): string;
+	hash(password: string, saltB64?: string): [string, string];
 	verify(
 		password: string,
 		existingB64Digest: string,
@@ -26,10 +27,11 @@ type GlobalState = {
 
 const router = new Router();
 
-// Register handlers in order of priority. 
-// This means wildcard / catch-all handlers 
+// Register handlers in order of priority.
+// This means wildcard / catch-all handlers
 // like the static file handlers must register last
 registerMarketingHandlers(router);
+registerAuthHandlers(router);
 registerStaticHandlers(router);
 
 class Server {

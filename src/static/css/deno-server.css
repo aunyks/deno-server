@@ -234,7 +234,7 @@ header.navbar > aside {
 
 nav.navbar {
   border-bottom: 1px solid rgba(0, 0, 0, 0.35);
-  padding: 0 10px 0 10px;
+  padding: 0 var(--spacing) 0 var(--spacing);
   flex-wrap: wrap;
   background: var(--background-color);
   position: sticky;

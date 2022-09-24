@@ -5,8 +5,7 @@ import { htmlContentType } from '/lib/headers.ts';
 export default function registerMarketingHandlers(router: Router) {
 	router.get(
 		'/',
-		async (
-		) => {
+		async () => {
 			const headers = new Headers({
 				'Content-Type': htmlContentType(),
 			});

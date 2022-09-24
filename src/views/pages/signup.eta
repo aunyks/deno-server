@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <%~ includeFile('/components/marketing-static-imports.eta') %> <title>Sign up - Deno Server</title>
+        <meta name="description" content="Create a Deno Server account.">
+        <link rel="stylesheet" href="/css/auth.css">
+    </head>
+
+    <body> <%~ includeFile('/components/marketing-navbar.eta', {}) %> <main class="container">
+            <h1>Create an account</h1> <% if(!!it.errorMessage) { %> <p class="auth-error"> <%= it.errorMessage %> </p>
+            <% } %> <form action="signup" method="post">
+                <label for="username">
+                    <input type="text" id="username" name="username" placeholder="Username"
+                        value="<%= it.values.username || '' %>" autocomplete="username" required />
+                </label>
+                <label for="email">
+                    <input type="email" id="email" name="email" placeholder="Email" value="<%= it.values.email || '' %>"
+                        autocomplete="email" required />
+                </label>
+                <label for="password">
+                    <input type="password" id="password" name="password" placeholder="Password"
+                        value="<%= it.values.password || '' %>" autocomplete="new-password" required />
+                </label>
+                <label for="confirm-password">
+                    <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirm Password"
+                        value="<%= it.values.confirmPassword || '' %>" autocomplete="new-password" required />
+                </label>
+                <button type="submit">Sign up</button>
+            </form>
+        </main>
+    </body>
+
+</html>

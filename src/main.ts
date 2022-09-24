@@ -64,13 +64,47 @@ async function main() {
 
 	const connection = await pool.connect();
 	try {
-		// Create the table
+		// Create tables
 		await connection.queryObject`
-		CREATE TABLE IF NOT EXISTS todos (
-		  id SERIAL PRIMARY KEY,
-		  title TEXT NOT NULL
+		CREATE TABLE IF NOT EXISTS Users (
+		  id BIGSERIAL PRIMARY KEY,
+		  username VARCHAR(20) NOT NULL UNIQUE,
+		  email VARCHAR(75) NOT NULL UNIQUE,
+		  email_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+		  password TEXT NOT NULL,
+		  salt VARCHAR(32) NOT NULL,
+		  created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
+		  last_updated_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
 		)
 	  `;
+
+		await connection.queryObject`
+		CREATE TABLE IF NOT EXISTS Logins (
+		  user_id BIGSERIAL REFERENCES Users(id),
+		  login_token VARCHAR(50) UNIQUE,
+		  created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
+		)
+	  `;
+
+		await connection.queryObject`
+		CREATE TABLE IF NOT EXISTS AccountRecoveries (
+		  user_id BIGSERIAL REFERENCES Users(id),
+		  recovery_token VARCHAR(50) UNIQUE,
+		  created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
+		)
+	  `;
+
+	// TODO: 
+	// 	await connection.queryObject`
+	// 	CREATE TABLE IF NOT EXISTS EmailConfirmations (
+	// 	  user_id BIGSERIAL REFERENCES Users(id),
+	// 	  new_email VARCHAR(75) NOT NULL UNIQUE,
+	// 	  confirmation_token VARCHAR(50) UNIQUE,
+	// 	  created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
+	// 	)
+	//   `;
+	} catch (e) {
+		console.error(`Error while setting up tables: ${e.message}`);
 	} finally {
 		connection.release();
 	}

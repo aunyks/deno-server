@@ -1,0 +1,49 @@
+h1 {
+    margin-bottom: calc(var(--typography-spacing-vertical) * 0.4);
+}
+
+hgroup > h1 {
+    margin-bottom: 0;
+}
+
+p.auth-error {
+    background: red;
+    color: white;
+    border-radius: 5px;
+    padding-top: calc(var(--typography-spacing-vertical) / 2);
+    padding-left: var(--spacing);
+    padding-right: var(--spacing);
+    padding-bottom: calc(var(--typography-spacing-vertical) / 2);
+}
+
+p.auth-success {
+    background: green;
+    color: white;
+    border-radius: 5px;
+    padding-top: calc(var(--typography-spacing-vertical) / 2);
+    padding-left: var(--spacing);
+    padding-right: var(--spacing);
+    padding-bottom: calc(var(--typography-spacing-vertical) / 2);
+}
+
+body>main>p {
+    margin-top: var(--typography-spacing-vertical);
+}
+
+@media only screen and (min-width: 576px) {
+    main.container {
+        width: 50%;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    main.container {
+        width: 30%;
+    }
+}
+
+@media only screen and (prefers-color-scheme: dark) {
+    p.auth-error {
+        background: #c00;
+    }
+}
