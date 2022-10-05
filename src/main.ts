@@ -94,15 +94,15 @@ async function main() {
 		)
 	  `;
 
-	// TODO: 
-	// 	await connection.queryObject`
-	// 	CREATE TABLE IF NOT EXISTS EmailConfirmations (
-	// 	  user_id BIGSERIAL REFERENCES Users(id),
-	// 	  new_email VARCHAR(75) NOT NULL UNIQUE,
-	// 	  confirmation_token VARCHAR(50) UNIQUE,
-	// 	  created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
-	// 	)
-	//   `;
+		// TODO:
+		await connection.queryObject`
+		CREATE TABLE IF NOT EXISTS PendingEmailConfirmations (
+		  user_id BIGSERIAL REFERENCES Users(id),
+		  new_email VARCHAR(75) NOT NULL UNIQUE,
+		  confirmation_token VARCHAR(50) UNIQUE,
+		  created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()
+		)
+	  `;
 	} catch (e) {
 		console.error(`Error while setting up tables: ${e.message}`);
 	} finally {

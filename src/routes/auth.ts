@@ -38,6 +38,12 @@ function createAccountRecoveryLoginToken(): string {
 	);
 }
 
+function createEmailConfirmationToken(): string {
+	return toBase64(
+		crypto.getRandomValues(new Uint8Array(32)),
+	);
+}
+
 async function signupPage(status: number, headers: Headers): Promise<Response> {
 	return new Response(
 		await Eta.renderFile('/pages/signup.eta', { values: {} }) as BodyInit,
@@ -145,7 +151,7 @@ function forgotPasswordEmailText(
 	return `To change your password, visit ${thisOrigin}/change-password/${
 		encodeURIComponent(recoveryToken)
 	}.\n
-If you did not make this request, ignore the link above.`;
+If you did not make this request, please ignore the link above.`;
 }
 
 function forgotPasswordEmailHtml(
@@ -159,7 +165,7 @@ function forgotPasswordEmailHtml(
     To change your password, visit <a href="${recoveryUrl}">${recoveryUrl}</a>.
     </p>
     <p>
-    If you did not make this request, ignore the link above.
+    If you did not make this request, please ignore the link above.
     </p>`;
 }
 
@@ -190,6 +196,144 @@ export async function userIdFromLoginToken(
 	return userId;
 }
 
+function confirmEmailText(
+	confToken: string,
+	thisOrigin: string,
+): string {
+	return `To confirm your Deno Server email, visit ${thisOrigin}/confirm-email/${
+		encodeURIComponent(confToken)
+	}.\n
+If you did not make this request, ignore the link above.`;
+}
+
+function confirmEmailHtml(
+	confToken: string,
+	thisOrigin: string,
+): string {
+	const recoveryUrl = `${thisOrigin}/confirm-email/${
+		encodeURIComponent(confToken)
+	}`;
+	return `<p>
+    To confirm your Deno Server email, visit <a href="${recoveryUrl}">${recoveryUrl}</a>.
+    </p>
+    <p>
+    If you did not make this request, ignore the link above.
+    </p>`;
+}
+
+async function askConfirmEmail(
+	email: string,
+	userId: string,
+	serverOrigin: string,
+	mailClient: GlobalState['mailClient'],
+	sqlConnPool: GlobalState['sqlConnPool'],
+) {
+	const confToken = createEmailConfirmationToken();
+
+	try {
+		await mailClient.send({
+			to: email,
+			from: `Deno Server Account Confirmation <noreply@deno-server.com>`,
+			subject: 'Confirm Account Email',
+			content: confirmEmailText(confToken, serverOrigin),
+			html: confirmEmailHtml(confToken, serverOrigin),
+			priority: 'high',
+		});
+	} catch (e) {
+		throw new Error(
+			`Error while sending an email confirmation message: ${e.stack}`,
+		);
+	}
+
+	const createConfirmationConnection = await sqlConnPool.connect();
+	try {
+		await createConfirmationConnection
+			.queryObject(
+				`INSERT INTO PendingEmailConfirmations (user_id, new_email, confirmation_token) VALUES ($1, $2, $3)`,
+				[
+					userId,
+					email,
+					confToken,
+				],
+			);
+	} catch (e) {
+		throw new Error(
+			`Error while creating new pending email confirmation: ${e.stack}`,
+		);
+	} finally {
+		createConfirmationConnection.release();
+	}
+}
+
+async function confirmEmail(
+	confirmationToken: string,
+	sqlConnPool: GlobalState['sqlConnPool'],
+) {
+	// Search token in emailconfirmations
+	const checkConfirmationConnection = await sqlConnPool.connect();
+	let userId = '';
+	let email = '';
+	try {
+		const checkConfResult = await checkConfirmationConnection
+			.queryObject<{ user_id: string; new_email: string }>(
+				`SELECT user_id, new_email FROM PendingEmailConfirmations WHERE confirmation_token = $1`,
+				[
+					confirmationToken,
+				],
+			);
+		if (checkConfResult.rows.length === 0) {
+			checkConfirmationConnection.release();
+			return;
+		}
+		userId = checkConfResult.rows[0].user_id;
+		email = checkConfResult.rows[0].new_email;
+	} catch (e) {
+		throw new Error(
+			`Error while creating new pending email confirmation: ${e.stack}`,
+		);
+	} finally {
+		checkConfirmationConnection.release();
+	}
+
+	// Update email_confirmed for user
+	const updateConfirmationConnection = await sqlConnPool.connect();
+	try {
+		await updateConfirmationConnection
+			.queryObject(
+				`UPDATE Users SET email_confirmed = TRUE, email = $1, last_updated_at = $2 WHERE id = $3`,
+				[
+					email,
+					(new Date()).toISOString(),
+					userId,
+				],
+			);
+	} catch (e) {
+		throw new Error(
+			`Error updating new user email confirmation status: ${e.stack}`,
+		);
+	} finally {
+		updateConfirmationConnection.release();
+	}
+
+	// delete from emailconfirmations
+	const deletePendingConfConnection = await sqlConnPool.connect();
+	try {
+		await deletePendingConfConnection
+			.queryObject(
+				`DELETE FROM PendingEmailConfirmations WHERE confirmation_token = $1`,
+				[
+					confirmationToken,
+				],
+			);
+	} catch (e) {
+		throw new Error(
+			`Error deleting pending email confirmation: ${e.stack}`,
+		);
+	} finally {
+		deletePendingConfConnection.release();
+	}
+}
+
 export default function registerAuthHandlers(router: Router) {
 	router.get(
 		'/signup',
@@ -203,7 +347,7 @@ export default function registerAuthHandlers(router: Router) {
 
 	router.post(
 		'/signup',
-		async (req, _, { passwordHasher, sqlConnPool, log }) => {
+		async (req, _, { passwordHasher, mailClient, sqlConnPool, log }) => {
 			const headers = new Headers({
 				'Content-Type': htmlContentType(),
 			});
@@ -355,7 +499,7 @@ export default function registerAuthHandlers(router: Router) {
 							formValues.username,
 							formValues.email,
 							hashedPasswordBase64,
-							saltBase64
+							saltBase64,
 						],
 					);
 				userId = userCreationResult.rows[0].id;
@@ -366,6 +510,19 @@ export default function registerAuthHandlers(router: Router) {
 				userCreationConnection.release();
 			}
 
+			const reqUrl = new URL(req.url);
+			try {
+				await askConfirmEmail(
+					formValues.email,
+					userId,
+					reqUrl.origin,
+					mailClient,
+					sqlConnPool,
+				);
+			} catch (e) {
+				log.error('Error sending confirmation email');
+			}
+
 			const loginToken = createLoginToken();
 			const sessionCreationConnection = await sqlConnPool.connect();
 			try {
@@ -373,7 +530,7 @@ export default function registerAuthHandlers(router: Router) {
 					'INSERT INTO Logins (user_id, login_token) VALUES ($1, $2)',
 					[
 						userId,
-						loginToken
+						loginToken,
 					],
 				);
 			} catch (e) {
@@ -494,7 +651,7 @@ export default function registerAuthHandlers(router: Router) {
 					'INSERT INTO Logins (user_id, login_token) VALUES ($1, $2)',
 					[
 						userId,
-						loginToken
+						loginToken,
 					],
 				);
 			} catch (e) {
@@ -603,7 +760,7 @@ export default function registerAuthHandlers(router: Router) {
 					'INSERT INTO AccountRecoveries (user_id, recovery_token) VALUES ($1, $2)',
 					[
 						userId,
-						recoveryToken
+						recoveryToken,
 					],
 				);
 			} catch (e) {
@@ -620,14 +777,24 @@ export default function registerAuthHandlers(router: Router) {
 			}
 
 			const reqUrl = new URL(req.url);
-			mailClient.send({
-				to: userEmail,
-				from: `Deno Server Account Recovery <noreply@deno-server.com>`,
-				subject: 'Change Deno Server Password',
-				content: forgotPasswordEmailText(recoveryToken, reqUrl.origin),
-				html: forgotPasswordEmailHtml(recoveryToken, reqUrl.origin),
-				priority: 'high',
-			});
+			try {
+				await mailClient.send({
+					to: userEmail,
+					from:
+						`Deno Server Account Recovery <noreply@deno-server.com>`,
+					subject: 'Change Deno Server Password',
+					content: forgotPasswordEmailText(
+						recoveryToken,
+						reqUrl.origin,
+					),
+					html: forgotPasswordEmailHtml(recoveryToken, reqUrl.origin),
+					priority: 'high',
+				});
+			} catch (e) {
+				throw new Error(
+					`Error while sending password change email: ${e.stack}`,
+				);
+			}
 
 			return forgotPasswordPage(
 				200,
@@ -856,6 +1023,30 @@ export default function registerAuthHandlers(router: Router) {
 				}
 			}
 			removeLoginCookie(headers);
+			return await new Response('', { headers, status: 302 });
+		},
+	);
+
+	router.get(
+		'/confirm-email/:encodedConfToken',
+		async (_, params, { sqlConnPool, log }) => {
+			const headers = new Headers({
+				'Content-Type': htmlContentType(),
+				'Location': '/',
+			});
+
+			const confToken = decodeURIComponent(
+				params['encodedConfToken'],
+			);
+
+			try {
+				await confirmEmail(confToken, sqlConnPool);
+			} catch (e) {
+				log.error(`Error confirming user email ${e.stack}`)
+				return await new Response('', { headers, status: 500 });
+			}
+
+			headers.set('Location', POST_LOGIN_ROUTE);
 			return await new Response('', { headers, status: 302 });
 		},
 	);
